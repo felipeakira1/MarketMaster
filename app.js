@@ -22,6 +22,37 @@ app.get('/', async (req, res) => {
     };*/
 });
 
+app.post('/get-user', async (req, res) => {
+    const { username } = req.body;
+    console.log(username);
+    try {
+        const [user] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+
+        if(user.length > 0) {
+            res.json(user[0]);
+        } else {
+            res.status(404).send('Usuario nao encontrado');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao buscar usuario');
+    }
+})
+
+app.get('/get-user', async (req, res) => {
+    
+    const username = 'felipeakira1';
+    try {
+        const [user] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+
+        console.log(user);
+        res.send('user')
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao buscar usuario');
+    }
+})
+
 app.listen(process.env.SERVER, () => {
     console.log(`Server started on <http://localhost:${process.env.SERVER}>`);
 })
