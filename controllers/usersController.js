@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const { getUserByUsername } = require('../models/usersModel');
 
 async function login(req, res) {
@@ -24,6 +26,19 @@ async function login(req, res) {
     }
 }
 
+async function hashPassword (req, res) {
+    try {
+        const { password } = req.body;
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        console.log(hashedPassword);
+        res.json({ hashedPassword });
+    } catch(err) {
+        console.error(error);
+        res.status(500).send('Erro ao gerar o hash da senha');
+    }
+}
 module.exports = {
-    login
+    login,
+    hashPassword
 }

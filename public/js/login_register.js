@@ -1,4 +1,6 @@
   
+
+
 async function pesquisarUsername() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -35,5 +37,34 @@ async function pesquisarUsername() {
         }
     } catch (err) {
         console.error('Erro ao buscar usuario:', err);
+    }
+}
+
+async function createHash(password) {
+    const saltRounds = 10;
+    try {
+        const hash = await bcrypt.hash(password, saltRounds);
+        console.log(`Hash da senha: ${hash}`);
+        return hash;
+    } catch(err) {
+        console.error('Erro ao gerar hash da senha:', erro);
+    }
+}
+
+async function registerUser() {
+    const password = document.getElementById('password').value;
+
+    const response = await fetch('/user/hash-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        console.log('Hash da senha:', data.hashedPassword);
+        // Você pode fazer algo com o hash da senha aqui
+    } else {
+        console.error('Erro ao gerar o hash da senha');
     }
 }
