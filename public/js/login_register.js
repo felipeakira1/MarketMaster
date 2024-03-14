@@ -1,6 +1,3 @@
-  
-
-
 async function pesquisarUsername() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -40,31 +37,30 @@ async function pesquisarUsername() {
     }
 }
 
-async function createHash(password) {
-    const saltRounds = 10;
-    try {
-        const hash = await bcrypt.hash(password, saltRounds);
-        console.log(`Hash da senha: ${hash}`);
-        return hash;
-    } catch(err) {
-        console.error('Erro ao gerar hash da senha:', erro);
-    }
-}
-
 async function registerUser() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
 
-    const response = await fetch('/user/hash-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-    });
+    if(password === confirmPassword) {
+        try {
+            const response = await fetch('/user/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, username, password })
+            });
 
-    if (response.ok) {
-        const data = await response.json();
-        console.log('Hash da senha:', data.hashedPassword);
-        // Você pode fazer algo com o hash da senha aqui
+            const responseData = await response.json();
+            console.log(responseData.message);
+
+        } catch(err) {
+            console.error('Erro: ', err);
+        }
+
     } else {
-        console.error('Erro ao gerar o hash da senha');
+        const passwordResult = document.getElementById('passwordResult');
+        passwordResult.innerText = 'Passwords are different'
     }
 }

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 
-const { getUserByUsername } = require('../models/usersModel');
+const { getUserByUsername, insertUser } = require('../models/usersModel');
 
 async function login(req, res) {
     const {username, password} = req.body;
@@ -26,19 +26,37 @@ async function login(req, res) {
     }
 }
 
-async function hashPassword (req, res) {
+async function register(req, res) {
+    const saltRounds = 10;
+
+    const user = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        name: req.body.name
+    };
+
+    user.password = await bcrypt.hash(user.password, saltRounds);
+    
     try {
-        const { password } = req.body;
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        console.log(hashedPassword);
-        res.json({ hashedPassword });
+        const resultFromInsert = await insertUser(user);
+        console.log(resultFromInsert);
+        if(resultFromInsert.affectedRows > 0) {
+            res.status(201).json({message: 'User added successfully'});
+        } else {
+            res.status(400).json({message: 'Failed to register user'});
+        }
     } catch(err) {
-        console.error(error);
-        res.status(500).send('Erro ao gerar o hash da senha');
+        if(err.code === 'ER_DUP_ENTRY') {
+            res.status(409).json({message: err.message});
+        } else {
+            console.error('Failed to register user', err);
+            res.status(500).json({message: 'Erro interno do servidor'});
+        }
     }
 }
+
 module.exports = {
     login,
-    hashPassword
+    register
 }

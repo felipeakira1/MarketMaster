@@ -10,6 +10,24 @@ async function getUserByUsername(username) {
     }
 }
 
+async function insertUser(user) {
+    try {
+        const result = await db.query('INSERT INTO users (username, email, password, name) VALUES (?, ?, ?, ?)',
+                                        [user.username, user.email, user.password, user.name]);
+        return result;
+    } catch(err) {
+        if(err.code === 'ER_DUP_ENTRY') {
+            const isUsernameDuplicate = err.message.includes('username');
+            const isEmailDuplicate = err.message.includes('email');
+            throw { code: err.code, message: isUsernameDuplicate ? 'Username already exists' : isEmailDuplicate ? 'Email already exists' : 'Duplicate entry found'}
+        } else {
+            console.error('Error adding user to database.');
+            throw err;
+        }
+    }
+}
+
 module.exports = {
-    getUserByUsername
+    getUserByUsername,
+    insertUser
 }
